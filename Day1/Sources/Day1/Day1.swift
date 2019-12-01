@@ -1,3 +1,3 @@
 func calculateFuel(for mass: Int) -> Int {
-	return mass
+	return mass / 3 - 2
 }

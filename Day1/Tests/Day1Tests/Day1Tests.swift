@@ -19,4 +19,10 @@ final class Day1Tests: XCTestCase {
 			XCTAssertEqual(fuelRequired, example.expected)
 		}
 	}
+
+	func testDay1Part1() {
+		print(input
+			.map(calculateFuel)
+			.reduce(0, +))
+	}
 }

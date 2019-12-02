@@ -20,4 +20,8 @@ final class IntCode {
 			currentIndex += 4
 		}
 	}
+
+	var output: Int {
+		input[0]
+	}
 }

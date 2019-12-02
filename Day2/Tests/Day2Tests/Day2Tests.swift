@@ -28,7 +28,7 @@ final class Day2Tests: XCTestCase {
 		copy[2] = 02
 		let program = IntCode(input: copy)
 		program.execute()
-		print(program.output)
+		print("Solution to day 2 part 1:", program.output)
 	}
 
 	func testDay2Part2() {
@@ -41,7 +41,7 @@ final class Day2Tests: XCTestCase {
 				program.execute()
 
 				if program.output == 19690720 {
-					return print(100 * noun + verb)
+					return print("Solution to day 2 part 2:", 100 * noun + verb)
 				}
 			}
 		}

@@ -39,13 +39,13 @@ final class Day1Tests: XCTestCase {
 	}
 
 	func testDay1Part1() {
-		print(input
+		print("Solution to day 1 part 1:", input
 			.map(calculateFuel)
 			.reduce(0, +))
 	}
 
 	func testDay1Part2() {
-		print(input
+		print("Solution to day 1 part 2:", input
 			.map(calculateFuelIncludingFuelsFuel)
 			.reduce(0, +))
 	}

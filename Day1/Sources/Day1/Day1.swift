@@ -12,3 +12,11 @@ func calculateFuelIncludingFuelsFuel(for mass: Int) -> Int {
 	}
 	return totalFuel
 }
+
+func recursivelyAddUpFuel(for mass: Int, total: Int = 0) -> Int {
+	let fuel = calculateFuel(for: mass)
+
+	guard fuel > 0 else { return total }
+
+	return recursivelyAddUpFuel(for: fuel, total: fuel + total)
+}

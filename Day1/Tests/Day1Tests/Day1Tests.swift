@@ -14,12 +14,12 @@ final class Day1Tests: XCTestCase {
 		for example in examples {
 			// When
 			let fuelRequired = calculateFuel(for: example.input)
-			
+
 			// Then
 			XCTAssertEqual(fuelRequired, example.expected)
 		}
 	}
-	
+
 	func testExampleMassesIncludingFuelsFuel() {
 		// Given
 		let examples: [(input: Int, expected: Int)] = [
@@ -28,11 +28,29 @@ final class Day1Tests: XCTestCase {
 			(1969, 966),
 			(100756, 50346)
 		]
-		
+
 		for example in examples {
 			// When
 			let fuelRequired = calculateFuelIncludingFuelsFuel(for: example.input)
-			
+
+			// Then
+			XCTAssertEqual(fuelRequired, example.expected)
+		}
+	}
+
+	func testAddingUpFuelRecursively() {
+		// Given
+		let examples: [(input: Int, expected: Int)] = [
+			(12, 2),
+			(14, 2),
+			(1969, 966),
+			(100756, 50346)
+		]
+
+		for example in examples {
+			// When
+			let fuelRequired = recursivelyAddUpFuel(for: example.input)
+
 			// Then
 			XCTAssertEqual(fuelRequired, example.expected)
 		}

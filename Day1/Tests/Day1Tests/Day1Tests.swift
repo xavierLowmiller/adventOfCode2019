@@ -14,7 +14,25 @@ final class Day1Tests: XCTestCase {
 		for example in examples {
 			// When
 			let fuelRequired = calculateFuel(for: example.input)
-
+			
+			// Then
+			XCTAssertEqual(fuelRequired, example.expected)
+		}
+	}
+	
+	func testExampleMassesIncludingFuelsFuel() {
+		// Given
+		let examples: [(input: Int, expected: Int)] = [
+			(12, 2),
+			(14, 2),
+			(1969, 966),
+			(100756, 50346)
+		]
+		
+		for example in examples {
+			// When
+			let fuelRequired = calculateFuelIncludingFuelsFuel(for: example.input)
+			
 			// Then
 			XCTAssertEqual(fuelRequired, example.expected)
 		}
@@ -23,6 +41,12 @@ final class Day1Tests: XCTestCase {
 	func testDay1Part1() {
 		print(input
 			.map(calculateFuel)
+			.reduce(0, +))
+	}
+
+	func testDay1Part2() {
+		print(input
+			.map(calculateFuelIncludingFuelsFuel)
 			.reduce(0, +))
 	}
 }

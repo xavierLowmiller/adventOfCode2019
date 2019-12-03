@@ -69,7 +69,7 @@ private enum Direction {
 	}
 }
 
-extension Array where Element == Direction {
+private extension Array where Element == Direction {
 	var points: Set<Point> {
 		var points: Set<Point> = []
 		var currentPoint: Point = .zero
@@ -96,4 +96,74 @@ func findClosestIntersection(of wires: String) -> Int {
 	return intersections.map { $0.distance }.min() ?? 0
 }
 
+private extension Array where Element == Direction {
+	func signalDelay(until intersections: Set<Point>) -> [Point: Int] {
+
+		var result: [(point: Point, delay: Int)] = []
+
+		for intersection in intersections {
+
+			var steps = 0
+			var point: Point = .zero
+
+			directionLoop: for direction in self {
+				switch direction {
+				case .up(let distance):
+					for _ in 1...distance {
+						point = Point(x: point.x, y: point.y + 1)
+						steps += 1
+						if point == intersection {
+							result.append((point, steps))
+							break directionLoop
+						}
+					}
+				case .down(let distance):
+					for _ in 1...distance {
+						point = Point(x: point.x, y: point.y - 1)
+						steps += 1
+						if point == intersection {
+							result.append((point, steps))
+							break directionLoop
+						}
+					}
+				case .left(let distance):
+					for _ in 1...distance {
+						point = Point(x: point.x - 1, y: point.y)
+						steps += 1
+						if point == intersection {
+							result.append((point, steps))
+							break directionLoop
+						}
+					}
+				case .right(let distance):
+					for _ in 1...distance {
+						point = Point(x: point.x + 1, y: point.y)
+						steps += 1
+						if point == intersection {
+							result.append((point, steps))
+							break directionLoop
+						}
+					}
+				}
+			}
+		}
+
+		return Dictionary(uniqueKeysWithValues: result)
+	}
+}
+
+func signalDelay(of wires: String) -> Int {
+	let directions = parseInput(wires)
+	let wires = directions.map { $0.points }
+	let intersections = wires[0].intersection(wires[1])
+
+	let delaysUntilPoints = directions.map { $0.signalDelay(until: intersections) }
+
+	let totalDelayPerPoint: [Point: Int] = intersections.reduce(into: [:]) { (result, point) in
+		for delay in delaysUntilPoints {
+			result[point, default: 0] += delay[point] ?? 0
+		}
+	}
+
+	return totalDelayPerPoint.values.min() ?? 0
 }

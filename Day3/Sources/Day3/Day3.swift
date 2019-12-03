@@ -96,33 +96,4 @@ func findClosestIntersection(of wires: String) -> Int {
 	return intersections.map { $0.distance }.min() ?? 0
 }
 
-// Debug
-extension Array where Element == Set<Point> {
-	var description: String {
-		let allPoints = self.flatMap { $0 }
-		let intersections = self[0].intersection(self[1])
-		let yMin = allPoints.map { $0.y }.min() ?? 0
-		let yMax = allPoints.map { $0.y }.max() ?? 0
-		let xMin = allPoints.map { $0.x }.min() ?? 0
-		let xMax = allPoints.map { $0.x }.max() ?? 0
-
-		var result = ""
-		for y in yMin...yMax {
-			for x in xMin...xMax {
-				let point = Point(x: x, y: y)
-				if point == .zero {
-					result.append("o")
-				} else if intersections.contains(point) {
-					result.append("X")
-				} else if allPoints.contains(point) {
-					result.append(".")
-				} else {
-					result.append(" ")
-				}
-			}
-			result.append("\n")
-		}
-
-		return result
-	}
 }

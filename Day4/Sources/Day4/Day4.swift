@@ -3,7 +3,7 @@ func possiblePasswordsPart1() -> Int {
 
 	for p in 231832...767346 {
 		let s = String(p)
-		if s.containsDuplicate, s.isOnlyAscending {
+		if s.isOnlyAscending, s.containsDuplicate {
 			count += 1
 		}
 	}
@@ -16,7 +16,7 @@ func possiblePasswordsPart2() -> Int {
 
 	for p in 231832...767346 {
 		let s = String(p)
-		if s.containsDuplicate, s.isOnlyAscending, s.containsPairThatIsRepeatedExactlyTwice {
+		if s.isOnlyAscending, s.containsDuplicateThatIsRepeatedExactlyTwice {
 			count += 1
 		}
 	}
@@ -26,13 +26,19 @@ func possiblePasswordsPart2() -> Int {
 
 private extension String {
 	var containsDuplicate: Bool {
-		for (c1, c2) in zip(self, self.dropFirst()) {
-			if c1 == c2 {
-				return true
-			}
+		let numberOfCharacters = reduce(into: [:]) { result, character in
+			result[character, default: 0] += 1
 		}
 
-		return false
+		return numberOfCharacters.values.contains { $0 >= 2 }
+	}
+
+	var containsDuplicateThatIsRepeatedExactlyTwice: Bool {
+		let numberOfCharacters = reduce(into: [:]) { result, character in
+			result[character, default: 0] += 1
+		}
+
+		return numberOfCharacters.values.contains { $0 == 2 }
 	}
 
 	var isOnlyAscending: Bool {
@@ -43,19 +49,5 @@ private extension String {
 		}
 
 		return true
-	}
-
-	var containsPairThatIsRepeatedExactlyTwice: Bool {
-		let array = Array(self)
-		for c in array {
-			let firstOccurrence = array.firstIndex(of: c)!
-			let lastOccurrence = array.lastIndex(of: c)!
-
-			if lastOccurrence == firstOccurrence + 1 {
-				return true
-			}
-		}
-
-		return false
 	}
 }

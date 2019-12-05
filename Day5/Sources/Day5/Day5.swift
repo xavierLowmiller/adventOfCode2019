@@ -43,6 +43,41 @@ struct Instruction {
 				print(memory[memory[pointer + 1]])
 			}
 			return pointer + 2
+		case 5: // Jump if true
+			let arg1 = arg1IsImmediate ? memory[pointer + 1] : memory[memory[pointer + 1]]
+			let arg2 = arg2IsImmediate ? memory[pointer + 2] : memory[memory[pointer + 2]]
+			if arg1 != 0 {
+				return arg2
+			} else {
+				return pointer + 3
+			}
+		case 6: // Jump if false
+			let arg1 = arg1IsImmediate ? memory[pointer + 1] : memory[memory[pointer + 1]]
+			let arg2 = arg2IsImmediate ? memory[pointer + 2] : memory[memory[pointer + 2]]
+			if arg1 == 0 {
+				return arg2
+			} else {
+				return pointer + 3
+			}
+		case 7: // Less Than
+			let arg1 = arg1IsImmediate ? memory[pointer + 1] : memory[memory[pointer + 1]]
+			let arg2 = arg2IsImmediate ? memory[pointer + 2] : memory[memory[pointer + 2]]
+			if arg1 < arg2 {
+				memory[memory[pointer + 3]] = 1
+			} else {
+				memory[memory[pointer + 3]] = 0
+			}
+			return pointer + 4
+		case 8: // Equals
+			let arg1 = arg1IsImmediate ? memory[pointer + 1] : memory[memory[pointer + 1]]
+			let arg2 = arg2IsImmediate ? memory[pointer + 2] : memory[memory[pointer + 2]]
+			if arg1 == arg2 {
+				memory[memory[pointer + 3]] = 1
+			} else {
+				memory[memory[pointer + 3]] = 0
+			}
+			return pointer + 4
+
 		case 99: // Halt
 			return pointer + 1
 		default:

@@ -25,4 +25,10 @@ final class Day5Tests: XCTestCase {
 		print("Solution to day 2 part 1:")
 		program.execute()
 	}
+
+	func testDay5Part2() {
+		let program = IntCode(memory: input, input: 5)
+		print("Solution to day 2 part 2:")
+		program.execute()
+	}
 }

@@ -2,7 +2,7 @@ import XCTest
 @testable import Day6
 
 final class Day6Tests: XCTestCase {
-	func testExample() {
+	func testExampleDay6Part1() {
 		// Given
 		let input = """
 		COM)B

@@ -9,24 +9,26 @@ struct Orbit {
 		solarSystem
 			.map { $0.value }
 			.reduce(into: 0) { (result, spaceObject) in
-				result += spaceObject.orbitChainLength(in: solarSystem)
+				result += spaceObject.orbitChain(in: solarSystem).count
 		}
 	}
+
 }
 
-struct SpaceObject {
+private struct SpaceObject {
 	let id: String
 	let orbitedObjectId: String
 
-	func orbitChainLength(in solarSystem: [String: SpaceObject]) -> Int {
-		var id = orbitedObjectId
+	func orbitChain(in solarSystem: [String: SpaceObject]) -> [String] {
+		var chain: [String] = [id]
 
-		var count = 1
+		var id = orbitedObjectId
 		while id != "COM" {
-			count += 1
 			id = solarSystem[id]!.orbitedObjectId
+			chain.append(id)
 		}
-		return count
+
+		return chain
 	}
 }
 

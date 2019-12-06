@@ -22,13 +22,13 @@ final class Day5Tests: XCTestCase {
 
 	func testDay5Part1() {
 		let program = IntCode(memory: input, input: 1)
-		print("Solution to day 2 part 1:")
+		print("Solution to day 5 part 1:")
 		program.execute()
 	}
 
 	func testDay5Part2() {
 		let program = IntCode(memory: input, input: 5)
-		print("Solution to day 2 part 2:")
+		print("Solution to day 5 part 2:")
 		program.execute()
 	}
 }

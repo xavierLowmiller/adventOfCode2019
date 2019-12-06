@@ -13,6 +13,21 @@ struct Orbit {
 		}
 	}
 
+	func jumpsRequired(between id1: String, and id2: String) -> Int {
+		let object1 = solarSystem[id1]!
+		let object2 = solarSystem[id2]!
+
+		let orbitChain1 = object1.orbitChain(in: solarSystem)
+		let orbitChain2 = object2.orbitChain(in: solarSystem)
+
+		let commonSubsequence = zip(orbitChain1.reversed(), orbitChain2.reversed())
+			.filter { $0.0 == $0.1 }
+			.map { $0.0 }
+			.reversed()
+
+		return orbitChain1.dropLast(commonSubsequence.count).count
+			+ orbitChain2.dropLast(commonSubsequence.count).count
+	}
 }
 
 private struct SpaceObject {

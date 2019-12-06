@@ -12,16 +12,10 @@ struct Orbit {
 		}
 	}
 
-	private func orbitChain(for id: String) -> [String] {
-		var chain: [String] = [id]
+	private func orbitChain(for id: String, chain: [String] = []) -> [String] {
+		guard let next = solarSystem[id] else { return chain + [id] }
 
-		var id = id
-		while id != "COM" {
-			id = solarSystem[id]!
-			chain.append(id)
-		}
-
-		return chain
+		return orbitChain(for: next, chain: chain + [id])
 	}
 
 	var checksum: Int {

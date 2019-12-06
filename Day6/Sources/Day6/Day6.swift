@@ -13,14 +13,14 @@ struct Orbit {
 	}
 
 	private func orbitChain(for id: String, chain: [String] = []) -> [String] {
-		guard let next = solarSystem[id] else { return chain + [id] }
+		guard let next = solarSystem[id] else { return chain }
 
 		return orbitChain(for: next, chain: chain + [id])
 	}
 
 	var checksum: Int {
 		solarSystem
-			.map { $0.value }
+			.map { $0.key }
 			.reduce(into: 0) { (result, id) in
 				result += orbitChain(for: id).count
 		}

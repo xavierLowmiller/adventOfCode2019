@@ -21,8 +21,8 @@ struct Orbit {
 	var checksum: Int {
 		solarSystem
 			.map { $0.key }
-			.reduce(into: 0) { (result, id) in
-				result += orbitChain(for: id).count
+			.reduce(0) { (result, id) in
+				result + orbitChain(for: id).count
 		}
 	}
 

@@ -25,6 +25,6 @@ final class Day7Tests: XCTestCase {
     }
 
 	func testDay7Part1() {
-		print("Solution to day 5 part 1:", findMaxOutput())
+		print("Solution to day 5 part 1:", IntCodeAssembly.findMaxOutput())
 	}
 }

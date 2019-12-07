@@ -86,22 +86,26 @@ struct Instruction {
 
 final class IntCode {
 	private(set) var memory: [Int]
-	private(set) var output = 0
-	private var input: [Int]
+	private(set) var output = 0 {
+		didSet { outputSignal(output) }
+	}
+	private var input: [Int] = []
+
+	var outputSignal: (Int) -> Void = { _ in }
 
 	private var instructionPointer = 0
 
-	init(memory: [Int], input: Int...) {
+	init(memory: [Int]) {
 		self.memory = memory
-		self.input = input
 	}
 
-	func execute() {
+	func execute(input: Int...) {
+		self.input = input
 		while memory[instructionPointer] != 99 {
 			let instruction = Instruction(opCode: memory[instructionPointer])
 			instructionPointer = instruction.execute(
 				on: &memory,
-				input: &input,
+				input: &self.input,
 				output: &output,
 				pointer: instructionPointer
 			)

@@ -49,3 +49,61 @@ struct IntCodeAssembly {
 		.max() ?? 0
 	}
 }
+
+final class FeedbackLoopAssembly {
+	private let amplifiers: (IntCode, IntCode, IntCode, IntCode, IntCode)
+	private let phaseSettings: [Int]
+
+	private var finalOutput: Int?
+
+	init(memory: [Int], phaseSettings: [Int]) {
+		assert(phaseSettings.count == 5)
+		self.phaseSettings = phaseSettings
+
+		amplifiers = (
+			IntCode(memory: memory),
+			IntCode(memory: memory),
+			IntCode(memory: memory),
+			IntCode(memory: memory),
+			IntCode(memory: memory)
+		)
+	}
+
+	func execute() -> Int {
+		amplifiers.0.execute(input: phaseSettings[0], 0)
+		amplifiers.1.execute(input: phaseSettings[1], amplifiers.0.output)
+		amplifiers.2.execute(input: phaseSettings[2], amplifiers.1.output)
+		amplifiers.3.execute(input: phaseSettings[3], amplifiers.2.output)
+		amplifiers.4.execute(input: phaseSettings[4], amplifiers.3.output)
+
+		amplifiers.0.outputSignal = { output in
+			self.amplifiers.1.execute(input: output)
+		}
+		amplifiers.1.outputSignal = { output in
+			self.amplifiers.2.execute(input: output)
+		}
+		amplifiers.2.outputSignal = { output in
+			self.amplifiers.3.execute(input: output)
+		}
+		amplifiers.3.outputSignal = { output in
+			self.amplifiers.4.execute(input: output)
+		}
+		amplifiers.4.outputSignal = { output in
+			self.finalOutput = output
+			self.amplifiers.0.execute(input: output)
+		}
+
+		amplifiers.0.execute(input: amplifiers.4.output)
+
+		return finalOutput!
+	}
+
+	static func findMaxOutput() -> Int {
+		[5, 6, 7, 8, 9].permutations
+			.map {
+				let assembly = FeedbackLoopAssembly(memory: input, phaseSettings: $0)
+				return assembly.execute()
+		}
+		.max() ?? 0
+	}
+}

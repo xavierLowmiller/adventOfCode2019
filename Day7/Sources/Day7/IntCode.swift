@@ -87,6 +87,7 @@ struct Instruction {
 final class IntCode {
 	private(set) var memory: [Int]
 
+	var output: Int = 0
 	var outputSignal: (Int) -> Void = { _ in }
 
 	private var instructionPointer = 0
@@ -108,6 +109,7 @@ final class IntCode {
 		}
 
 		if let output = output {
+			self.output = output
 			outputSignal(output)
 		}
 	}

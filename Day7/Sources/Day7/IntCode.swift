@@ -15,7 +15,7 @@ struct Instruction {
 	///
 	/// Returns the new instruction pointer
 	/// - Parameter memory: the memory to operate on
-	func execute(on memory: inout [Int], input: inout [Int], output: inout Int, pointer: Int) -> Int {
+	func execute(on memory: inout [Int], input: inout [Int], pointer: Int, output: (Int) -> Void) -> Int {
 		switch opCode {
 		case 1: // Add
 			let arg1 = arg1IsImmediate ? memory[pointer + 1] : memory[memory[pointer + 1]]
@@ -36,9 +36,9 @@ struct Instruction {
 			return pointer + 2
 		case 4: // Read
 			if arg1IsImmediate {
-				output = memory[pointer + 1]
+				output(memory[pointer + 1])
 			} else {
-				output = memory[memory[pointer + 1]]
+				output(memory[memory[pointer + 1]])
 			}
 			return pointer + 2
 		case 5: // Jump if true
@@ -77,7 +77,7 @@ struct Instruction {
 			return pointer + 4
 
 		case 99: // Halt
-			return pointer + 1
+			return -1
 		default:
 			fatalError("Invalid opcode \(opCode) at \(pointer)")
 		}
@@ -86,10 +86,6 @@ struct Instruction {
 
 final class IntCode {
 	private(set) var memory: [Int]
-	private(set) var output = 0 {
-		didSet { outputSignal(output) }
-	}
-	private var input: [Int] = []
 
 	var outputSignal: (Int) -> Void = { _ in }
 
@@ -100,15 +96,19 @@ final class IntCode {
 	}
 
 	func execute(input: Int...) {
-		self.input = input
-		while memory[instructionPointer] != 99 {
+		var input = input
+		var output: Int?
+		while memory[instructionPointer] != 99, output == nil {
 			let instruction = Instruction(opCode: memory[instructionPointer])
 			instructionPointer = instruction.execute(
 				on: &memory,
-				input: &self.input,
-				output: &output,
+				input: &input,
 				pointer: instructionPointer
-			)
+			) { output = $0 }
+		}
+
+		if let output = output {
+			outputSignal(output)
 		}
 	}
 }

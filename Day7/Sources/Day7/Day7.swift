@@ -9,15 +9,35 @@ struct IntCodeAssembly {
 	}
 
 	func execute() -> Int {
-		var output = 0
-
-		for index in 0..<5 {
-			let amplifier = IntCode(memory: memory)
-			amplifier.execute(input: phaseSettings[index], output)
-			output = amplifier.output
+		let amplifiers = (
+			IntCode(memory: memory),
+			IntCode(memory: memory),
+			IntCode(memory: memory),
+			IntCode(memory: memory),
+			IntCode(memory: memory)
+		)
+		amplifiers.0.outputSignal = { output in
+			amplifiers.1.execute(input: self.phaseSettings[1], output)
+		}
+		amplifiers.1.outputSignal = { output in
+			amplifiers.2.execute(input: self.phaseSettings[2], output)
+		}
+		amplifiers.2.outputSignal = { output in
+			amplifiers.3.execute(input: self.phaseSettings[3], output)
+		}
+		amplifiers.3.outputSignal = { output in
+			amplifiers.4.execute(input: self.phaseSettings[4], output)
 		}
 
-		return output
+		var output: Int?
+		amplifiers.4.outputSignal = {
+			output = $0
+		}
+
+		amplifiers.0.execute(input: phaseSettings[0], 0)
+
+
+		return output!
 	}
 
 	static func findMaxOutput() -> Int {

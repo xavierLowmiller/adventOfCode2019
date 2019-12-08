@@ -1,4 +1,5 @@
 import XCTest
+import IntCode
 @testable import Day5
 
 final class Day5Tests: XCTestCase {
@@ -12,7 +13,7 @@ final class Day5Tests: XCTestCase {
 
 		for example in examples {
 			// When
-			let program = IntCode(memory: example.input)
+			let program = Computer(memory: example.input)
 			program.execute()
 
 			// Then
@@ -21,14 +22,18 @@ final class Day5Tests: XCTestCase {
 	}
 
 	func testDay5Part1() {
-		let program = IntCode(memory: input, input: 1)
-		print("Solution to day 5 part 1:")
-		program.execute()
+		let program = Computer(memory: input)
+		var output = 0
+		while let newOutput = program.execute(input: 1) {
+			XCTAssertEqual(output, 0)
+			output = newOutput
+		}
+		print("Solution to day 5 part 1:", output)
 	}
 
-	func testDay5Part2() {
-		let program = IntCode(memory: input, input: 5)
-		print("Solution to day 5 part 2:")
-		program.execute()
+	func testDay5Part2() throws {
+		let program = Computer(memory: input)
+		let output = try XCTUnwrap(program.execute(input: 5))
+		print("Solution to day 5 part 2:", output)
 	}
 }

@@ -1,3 +1,5 @@
+import IntCode
+
 struct IntCodeAssembly {
 	private let memory: [Int]
 	private let phaseSettings: [Int]
@@ -9,35 +11,15 @@ struct IntCodeAssembly {
 	}
 
 	func execute() -> Int {
-		let amplifiers = (
-			IntCode(memory: memory),
-			IntCode(memory: memory),
-			IntCode(memory: memory),
-			IntCode(memory: memory),
-			IntCode(memory: memory)
-		)
-		amplifiers.0.outputSignal = { output in
-			amplifiers.1.execute(input: self.phaseSettings[1], output)
-		}
-		amplifiers.1.outputSignal = { output in
-			amplifiers.2.execute(input: self.phaseSettings[2], output)
-		}
-		amplifiers.2.outputSignal = { output in
-			amplifiers.3.execute(input: self.phaseSettings[3], output)
-		}
-		amplifiers.3.outputSignal = { output in
-			amplifiers.4.execute(input: self.phaseSettings[4], output)
-		}
+		guard
+			let output0 = Computer(memory: memory).execute(input: phaseSettings[0], 0),
+			let output1 = Computer(memory: memory).execute(input: phaseSettings[1], output0),
+			let output2 = Computer(memory: memory).execute(input: phaseSettings[2], output1),
+			let output3 = Computer(memory: memory).execute(input: phaseSettings[3], output2),
+			let output4 = Computer(memory: memory).execute(input: phaseSettings[4], output3)
+			else { return -1 }
 
-		var output: Int?
-		amplifiers.4.outputSignal = {
-			output = $0
-		}
-
-		amplifiers.0.execute(input: phaseSettings[0], 0)
-
-
-		return output!
+		return output4
 	}
 
 	static func findMaxOutput() -> Int {
@@ -51,7 +33,7 @@ struct IntCodeAssembly {
 }
 
 final class FeedbackLoopAssembly {
-	private let amplifiers: (IntCode, IntCode, IntCode, IntCode, IntCode)
+	private let amplifiers: (Computer, Computer, Computer, Computer, Computer)
 	private let phaseSettings: [Int]
 
 	private var finalOutput: Int?
@@ -61,41 +43,39 @@ final class FeedbackLoopAssembly {
 		self.phaseSettings = phaseSettings
 
 		amplifiers = (
-			IntCode(memory: memory),
-			IntCode(memory: memory),
-			IntCode(memory: memory),
-			IntCode(memory: memory),
-			IntCode(memory: memory)
+			Computer(memory: memory),
+			Computer(memory: memory),
+			Computer(memory: memory),
+			Computer(memory: memory),
+			Computer(memory: memory)
 		)
 	}
 
 	func execute() -> Int {
-		amplifiers.0.execute(input: phaseSettings[0], 0)
-		amplifiers.1.execute(input: phaseSettings[1], amplifiers.0.output)
-		amplifiers.2.execute(input: phaseSettings[2], amplifiers.1.output)
-		amplifiers.3.execute(input: phaseSettings[3], amplifiers.2.output)
-		amplifiers.4.execute(input: phaseSettings[4], amplifiers.3.output)
+		var lastOutput = 0
 
-		amplifiers.0.outputSignal = { output in
-			self.amplifiers.1.execute(input: output)
-		}
-		amplifiers.1.outputSignal = { output in
-			self.amplifiers.2.execute(input: output)
-		}
-		amplifiers.2.outputSignal = { output in
-			self.amplifiers.3.execute(input: output)
-		}
-		amplifiers.3.outputSignal = { output in
-			self.amplifiers.4.execute(input: output)
-		}
-		amplifiers.4.outputSignal = { output in
-			self.finalOutput = output
-			self.amplifiers.0.execute(input: output)
+		guard
+			let output0 = amplifiers.0.execute(input: phaseSettings[0], 0),
+			let output1 = amplifiers.1.execute(input: phaseSettings[1], output0),
+			let output2 = amplifiers.2.execute(input: phaseSettings[2], output1),
+			let output3 = amplifiers.3.execute(input: phaseSettings[3], output2),
+			let output4 = amplifiers.4.execute(input: phaseSettings[4], output3)
+			else { return -1 }
+
+		lastOutput = output4
+
+		while true {
+			guard
+				let output0 = amplifiers.0.execute(input: lastOutput),
+				let output1 = amplifiers.1.execute(input: output0),
+				let output2 = amplifiers.2.execute(input: output1),
+				let output3 = amplifiers.3.execute(input: output2),
+				let output4 = amplifiers.4.execute(input: output3)
+				else { break }
+			lastOutput = output4
 		}
 
-		amplifiers.0.execute(input: amplifiers.4.output)
-
-		return finalOutput!
+		return lastOutput
 	}
 
 	static func findMaxOutput() -> Int {

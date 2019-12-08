@@ -84,33 +84,34 @@ struct Instruction {
 	}
 }
 
-final class IntCode {
-	private(set) var memory: [Int]
+/// The IntCode computer
+public final class Computer {
+	private(set) public var memory: [Int]
 
-	var output: Int = 0
-	var outputSignal: (Int) -> Void = { _ in }
+	private var programCounter = 0
 
-	private var instructionPointer = 0
-
-	init(memory: [Int]) {
+	/// Loads a program into the computer's memory
+	/// - Parameter memory: The program to be executed
+	public init(memory: [Int]) {
 		self.memory = memory
 	}
 
-	func execute(input: Int...) {
+	/// Executes the program from the current program counter onwards
+	/// until an output is produced or the halt instruction is found
+	/// - Parameter input: Any input arguments
+	@discardableResult
+	public func execute(input: Int...) -> Int? {
 		var input = input
 		var output: Int?
-		while memory[instructionPointer] != 99, output == nil {
-			let instruction = Instruction(opCode: memory[instructionPointer])
-			instructionPointer = instruction.execute(
+		while memory[programCounter] != 99, output == nil {
+			let instruction = Instruction(opCode: memory[programCounter])
+			programCounter = instruction.execute(
 				on: &memory,
 				input: &input,
-				pointer: instructionPointer
+				pointer: programCounter
 			) { output = $0 }
 		}
 
-		if let output = output {
-			self.output = output
-			outputSignal(output)
-		}
+		return output
 	}
 }

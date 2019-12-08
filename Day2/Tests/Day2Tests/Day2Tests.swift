@@ -1,4 +1,5 @@
 import XCTest
+import IntCode
 @testable import Day2
 
 final class Day2Tests: XCTestCase {
@@ -14,11 +15,11 @@ final class Day2Tests: XCTestCase {
 
 		for example in examples {
 			// When
-			let program = IntCode(input: example.input)
+			let program = Computer(memory: example.input)
 			program.execute()
 
 			// Then
-			XCTAssertEqual(program.input, example.finalState)
+			XCTAssertEqual(program.memory, example.finalState)
 		}
 	}
 
@@ -26,9 +27,9 @@ final class Day2Tests: XCTestCase {
 		var copy = input
 		copy[1] = 12
 		copy[2] = 02
-		let program = IntCode(input: copy)
+		let program = Computer(memory: copy)
 		program.execute()
-		print("Solution to day 2 part 1:", program.output)
+		print("Solution to day 2 part 1:", program.memory[0])
 	}
 
 	func testDay2Part2() {
@@ -37,10 +38,10 @@ final class Day2Tests: XCTestCase {
 			for verb in 0...99 {
 				copy[1] = noun
 				copy[2] = verb
-				let program = IntCode(input: copy)
+				let program = Computer(memory: copy)
 				program.execute()
 
-				if program.output == 19690720 {
+				if program.memory[0] == 19690720 {
 					return print("Solution to day 2 part 2:", 100 * noun + verb)
 				}
 			}

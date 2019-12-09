@@ -145,7 +145,7 @@ public final class Computer {
 			programCounter += 2
 
 		case 99: // Halt
-			return -1
+			programCounter = -1
 		default:
 			fatalError("Invalid opcode \(instruction.opCode) at \(programCounter)")
 		}

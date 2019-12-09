@@ -155,6 +155,13 @@ public final class Computer {
 }
 
 private extension Array where Element == Int {
+
+	/// This subscript will always work for positive indices
+	///
+	/// - When writing to an index that is out of range, the array will resize
+	///   to always fit the index
+	/// - When reading at an index that is out of range, it will return a default
+	///   value of 1
 	subscript(safe index: Int) -> Element {
 		get {
 			if index >= count {

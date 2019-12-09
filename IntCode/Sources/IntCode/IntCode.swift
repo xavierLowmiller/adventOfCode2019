@@ -10,78 +10,6 @@ struct Instruction {
 		arg2IsImmediate = opCode / 1000 % 10 == 1
 		arg3IsImmediate = opCode / 10000 % 10 == 1
 	}
-
-	/// Manipulates the memory according to the opcode
-	///
-	/// Returns the new instruction pointer
-	/// - Parameter memory: the memory to operate on
-	func execute(on memory: inout [Int], input: inout [Int], pointer: Int, output: (Int) -> Void) -> Int {
-		switch opCode {
-		case 1: // Add
-			let arg1 = arg1IsImmediate ? memory[pointer + 1] : memory[memory[pointer + 1]]
-			let arg2 = arg2IsImmediate ? memory[pointer + 2] : memory[memory[pointer + 2]]
-			memory[memory[pointer + 3]] = arg1 + arg2
-			return pointer + 4
-		case 2: // Multiply
-			let arg1 = arg1IsImmediate ? memory[pointer + 1] : memory[memory[pointer + 1]]
-			let arg2 = arg2IsImmediate ? memory[pointer + 2] : memory[memory[pointer + 2]]
-			memory[memory[pointer + 3]] = arg1 * arg2
-			return pointer + 4
-		case 3: // Assign
-			if arg1IsImmediate {
-				memory[pointer + 1] = input.removeFirst()
-			} else {
-				memory[memory[pointer + 1]] = input.removeFirst()
-			}
-			return pointer + 2
-		case 4: // Read
-			if arg1IsImmediate {
-				output(memory[pointer + 1])
-			} else {
-				output(memory[memory[pointer + 1]])
-			}
-			return pointer + 2
-		case 5: // Jump if true
-			let arg1 = arg1IsImmediate ? memory[pointer + 1] : memory[memory[pointer + 1]]
-			let arg2 = arg2IsImmediate ? memory[pointer + 2] : memory[memory[pointer + 2]]
-			if arg1 != 0 {
-				return arg2
-			} else {
-				return pointer + 3
-			}
-		case 6: // Jump if false
-			let arg1 = arg1IsImmediate ? memory[pointer + 1] : memory[memory[pointer + 1]]
-			let arg2 = arg2IsImmediate ? memory[pointer + 2] : memory[memory[pointer + 2]]
-			if arg1 == 0 {
-				return arg2
-			} else {
-				return pointer + 3
-			}
-		case 7: // Less Than
-			let arg1 = arg1IsImmediate ? memory[pointer + 1] : memory[memory[pointer + 1]]
-			let arg2 = arg2IsImmediate ? memory[pointer + 2] : memory[memory[pointer + 2]]
-			if arg1 < arg2 {
-				memory[memory[pointer + 3]] = 1
-			} else {
-				memory[memory[pointer + 3]] = 0
-			}
-			return pointer + 4
-		case 8: // Equals
-			let arg1 = arg1IsImmediate ? memory[pointer + 1] : memory[memory[pointer + 1]]
-			let arg2 = arg2IsImmediate ? memory[pointer + 2] : memory[memory[pointer + 2]]
-			if arg1 == arg2 {
-				memory[memory[pointer + 3]] = 1
-			} else {
-				memory[memory[pointer + 3]] = 0
-			}
-			return pointer + 4
-
-		case 99: // Halt
-			return -1
-		default:
-			fatalError("Invalid opcode \(opCode) at \(pointer)")
-		}
-	}
 }
 
 /// The IntCode computer
@@ -105,13 +33,88 @@ public final class Computer {
 		var output: Int?
 		while memory[programCounter] != 99, output == nil {
 			let instruction = Instruction(opCode: memory[programCounter])
-			programCounter = instruction.execute(
-				on: &memory,
-				input: &input,
-				pointer: programCounter
-			) { output = $0 }
+			output = execute(instruction: instruction, input: &input)
 		}
 
 		return output
+	}
+
+	private func arg1(for instruction: Instruction) -> Int {
+		instruction.arg1IsImmediate
+			? memory[programCounter + 1]
+			: memory[memory[programCounter + 1]]
+	}
+
+	private func arg2(for instruction: Instruction) -> Int {
+		instruction.arg2IsImmediate
+			? memory[programCounter + 2]
+			: memory[memory[programCounter + 2]]
+	}
+
+	private func arg3(for instruction: Instruction) -> Int {
+		instruction.arg3IsImmediate
+			? memory[programCounter + 3]
+			: memory[memory[programCounter + 3]]
+	}
+
+	/// Manipulates the memory according to the Instruction
+	///
+	/// - Parameter memory: the memory to operate on
+	private func execute(instruction: Instruction, input: inout [Int]) -> Int? {
+		switch instruction.opCode {
+		case 1: // Add
+			memory[memory[programCounter + 3]] = arg1(for: instruction) + arg2(for: instruction)
+			programCounter += 4
+		case 2: // Multiply
+			memory[memory[programCounter + 3]] = arg1(for: instruction) * arg2(for: instruction)
+			programCounter += 4
+		case 3: // Assign
+			if instruction.arg1IsImmediate {
+				memory[programCounter + 1] = input.removeFirst()
+			} else {
+				memory[memory[programCounter + 1]] = input.removeFirst()
+			}
+			programCounter += 2
+		case 4: // Read
+			defer { programCounter += 2 }
+			if instruction.arg1IsImmediate {
+				return memory[programCounter + 1]
+			} else {
+				return memory[memory[programCounter + 1]]
+			}
+		case 5: // Jump if true
+			if arg1(for: instruction) != 0 {
+				programCounter = arg2(for: instruction)
+			} else {
+				programCounter += 3
+			}
+		case 6: // Jump if false
+			if arg1(for: instruction) == 0 {
+				programCounter = arg2(for: instruction)
+			} else {
+				programCounter += 3
+			}
+		case 7: // Less Than
+			if arg1(for: instruction) < arg2(for: instruction) {
+				memory[memory[programCounter + 3]] = 1
+			} else {
+				memory[memory[programCounter + 3]] = 0
+			}
+			programCounter += 4
+		case 8: // Equals
+			if arg1(for: instruction) == arg2(for: instruction) {
+				memory[memory[programCounter + 3]] = 1
+			} else {
+				memory[memory[programCounter + 3]] = 0
+			}
+			programCounter += 4
+
+		case 99: // Halt
+			return -1
+		default:
+			fatalError("Invalid opcode \(instruction.opCode) at \(programCounter)")
+		}
+
+		return nil
 	}
 }

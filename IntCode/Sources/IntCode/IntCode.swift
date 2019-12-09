@@ -86,8 +86,11 @@ public final class Computer {
 	}
 
 	/// Manipulates the memory according to the Instruction
+	/// Returns any output made during the execution
 	///
-	/// - Parameter memory: the memory to operate on
+	/// - Parameters:
+	///   - instruction: The instruction to execute
+	///   - input: Any input parameters
 	private func execute(instruction: Instruction, input: inout [Int]) -> Int? {
 		defer {
 			programCounter += instruction.programCounterIncrement

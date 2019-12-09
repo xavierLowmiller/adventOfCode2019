@@ -1,9 +1,9 @@
-struct Image {
-	let width: Int
-	let height: Int
-	let layers: [[Character]]
+public struct EncodedImage {
+	public let width: Int
+	public let height: Int
+	public let layers: [[Character]]
 
-	init(input: String, width: Int, height: Int) {
+	public init(input: String, width: Int, height: Int) {
 		self.width = width
 		self.height = height
 
@@ -28,19 +28,5 @@ struct Image {
 				result.append(layeredPixels.first { $0 != "2" } ?? "0")
 			}
 			.chunked(into: width).map { String($0) }
-	}
-}
-
-private extension Sequence {
-	func chunked(into size: Int) -> [[Self.Element]] {
-		reduce(into: []) { result, current in
-
-			if let last = result.last, last.count < size {
-				result.append(result.removeLast() + [current])
-			} else {
-				result.append([current])
-			}
-
-		}
 	}
 }

@@ -65,10 +65,18 @@ public final class Computer {
 	private func execute(instruction: Instruction, input: inout [Int]) -> Int? {
 		switch instruction.opCode {
 		case 1: // Add
-			memory[safe: memory[safe: programCounter + 3]] = arg1(for: instruction) + arg2(for: instruction)
+			if instruction.arg3Mode == .position {
+				memory[safe: memory[safe: programCounter + 3]] = arg1(for: instruction) + arg2(for: instruction)
+			} else {
+				memory[safe: relativeBase + memory[safe: programCounter + 3]] = arg1(for: instruction) + arg2(for: instruction)
+			}
 			programCounter += 4
 		case 2: // Multiply
-			memory[safe: memory[safe: programCounter + 3]] = arg1(for: instruction) * arg2(for: instruction)
+			if instruction.arg3Mode == .position {
+				memory[safe: memory[safe: programCounter + 3]] = arg1(for: instruction) * arg2(for: instruction)
+			} else {
+				memory[safe: relativeBase + memory[safe: programCounter + 3]] = arg1(for: instruction) * arg2(for: instruction)
+			}
 			programCounter += 4
 		case 3: // Assign
 			switch instruction.arg1Mode {
@@ -104,16 +112,32 @@ public final class Computer {
 			}
 		case 7: // Less Than
 			if arg1(for: instruction) < arg2(for: instruction) {
-				memory[safe: memory[safe: programCounter + 3]] = 1
+				if instruction.arg3Mode == .position {
+					memory[safe: memory[safe: programCounter + 3]] = 1
+				} else {
+					memory[safe: relativeBase + memory[safe: programCounter + 3]] = 1
+				}
 			} else {
-				memory[safe: memory[safe: programCounter + 3]] = 0
+				if instruction.arg3Mode == .position {
+					memory[safe: memory[safe: programCounter + 3]] = 0
+				} else {
+					memory[safe: relativeBase + memory[safe: programCounter + 3]] = 0
+				}
 			}
 			programCounter += 4
 		case 8: // Equals
 			if arg1(for: instruction) == arg2(for: instruction) {
-				memory[safe: memory[safe: programCounter + 3]] = 1
+				if instruction.arg3Mode == .position {
+					memory[safe: memory[safe: programCounter + 3]] = 1
+				} else {
+					memory[safe: relativeBase + memory[safe: programCounter + 3]] = 1
+				}
 			} else {
-				memory[safe: memory[safe: programCounter + 3]] = 0
+				if instruction.arg3Mode == .position {
+					memory[safe: memory[safe: programCounter + 3]] = 0
+				} else {
+					memory[safe: relativeBase + memory[safe: programCounter + 3]] = 0
+				}
 			}
 			programCounter += 4
 		case 9: // Adjust relative base

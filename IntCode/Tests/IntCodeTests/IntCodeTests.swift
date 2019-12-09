@@ -38,4 +38,16 @@ final class IntCodeTests: XCTestCase {
 			XCTAssertEqual(program.memory, example.finalState)
 		}
 	}
+
+	func testRelativeBase() {
+		// Given
+		let input = [109, 1, 204, 0, 99]
+
+		// When
+		let computer = Computer(memory: input)
+		let output = computer.execute()
+
+		// Then
+		XCTAssertEqual(output, 1)
+	}
 }

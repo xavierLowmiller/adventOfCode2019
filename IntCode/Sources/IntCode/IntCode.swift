@@ -1,22 +1,9 @@
-struct Instruction {
-	let arg1IsImmediate: Bool
-	let arg2IsImmediate: Bool
-	let arg3IsImmediate: Bool
-	let opCode: Int
-
-	init(opCode: Int) {
-		self.opCode = opCode % 100
-		arg1IsImmediate = opCode / 100 % 10 == 1
-		arg2IsImmediate = opCode / 1000 % 10 == 1
-		arg3IsImmediate = opCode / 10000 % 10 == 1
-	}
-}
-
 /// The IntCode computer
 public final class Computer {
 	private(set) public var memory: [Int]
 
 	private var programCounter = 0
+	private var relativeBase = 0
 
 	/// Loads a program into the computer's memory
 	/// - Parameter memory: The program to be executed
@@ -40,21 +27,36 @@ public final class Computer {
 	}
 
 	private func arg1(for instruction: Instruction) -> Int {
-		instruction.arg1IsImmediate
-			? memory[programCounter + 1]
-			: memory[memory[programCounter + 1]]
+		switch instruction.arg1Mode {
+		case .position:
+			return memory[memory[programCounter + 1]]
+		case .immediate:
+			return memory[programCounter + 1]
+		case .relative:
+			return memory[relativeBase + memory[programCounter + 1]]
+		}
 	}
 
 	private func arg2(for instruction: Instruction) -> Int {
-		instruction.arg2IsImmediate
-			? memory[programCounter + 2]
-			: memory[memory[programCounter + 2]]
+		switch instruction.arg2Mode {
+		case .position:
+			return memory[memory[programCounter + 2]]
+		case .immediate:
+			return memory[programCounter + 2]
+		case .relative:
+			return memory[relativeBase + memory[programCounter + 2]]
+		}
 	}
 
 	private func arg3(for instruction: Instruction) -> Int {
-		instruction.arg3IsImmediate
-			? memory[programCounter + 3]
-			: memory[memory[programCounter + 3]]
+		switch instruction.arg3Mode {
+		case .position:
+			return memory[memory[programCounter + 3]]
+		case .immediate:
+			return memory[programCounter + 3]
+		case .relative:
+			return memory[relativeBase + memory[programCounter + 3]]
+		}
 	}
 
 	/// Manipulates the memory according to the Instruction
@@ -69,18 +71,24 @@ public final class Computer {
 			memory[memory[programCounter + 3]] = arg1(for: instruction) * arg2(for: instruction)
 			programCounter += 4
 		case 3: // Assign
-			if instruction.arg1IsImmediate {
-				memory[programCounter + 1] = input.removeFirst()
-			} else {
+			switch instruction.arg1Mode {
+			case .position:
 				memory[memory[programCounter + 1]] = input.removeFirst()
+			case .immediate:
+				memory[programCounter + 1] = input.removeFirst()
+			case .relative
+				memory[relativeBase + memory[programCounter + 1]] = input.removeFirst()
 			}
 			programCounter += 2
 		case 4: // Read
 			defer { programCounter += 2 }
-			if instruction.arg1IsImmediate {
-				return memory[programCounter + 1]
-			} else {
+			switch instruction.arg1Mode {
+			case .position:
 				return memory[memory[programCounter + 1]]
+			case .immediate:
+				return memory[programCounter + 1]
+			case .relative:
+				return memory[relativeBase + memory[programCounter + 1]]
 			}
 		case 5: // Jump if true
 			if arg1(for: instruction) != 0 {
@@ -108,6 +116,9 @@ public final class Computer {
 				memory[memory[programCounter + 3]] = 0
 			}
 			programCounter += 4
+		case 9: // Adjust relative base
+			relativeBase += arg1(for: instruction)
+			programCounter += 2
 
 		case 99: // Halt
 			return -1

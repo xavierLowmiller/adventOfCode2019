@@ -29,7 +29,7 @@ public final class Computer {
 	private func arg1(for instruction: Instruction) -> Int {
 		switch instruction.arg1Mode {
 		case .position:
-			return memory[memory[programCounter + 1]]
+			return memory[safe: memory[safe: programCounter + 1]]
 		case .immediate:
 			return memory[programCounter + 1]
 		case .relative:
@@ -40,7 +40,7 @@ public final class Computer {
 	private func arg2(for instruction: Instruction) -> Int {
 		switch instruction.arg2Mode {
 		case .position:
-			return memory[memory[programCounter + 2]]
+			return memory[safe: memory[safe: programCounter + 2]]
 		case .immediate:
 			return memory[programCounter + 2]
 		case .relative:
@@ -51,7 +51,7 @@ public final class Computer {
 	private func arg3(for instruction: Instruction) -> Int {
 		switch instruction.arg3Mode {
 		case .position:
-			return memory[memory[programCounter + 3]]
+			return memory[safe: memory[safe: programCounter + 3]]
 		case .immediate:
 			return memory[programCounter + 3]
 		case .relative:
@@ -65,18 +65,18 @@ public final class Computer {
 	private func execute(instruction: Instruction, input: inout [Int]) -> Int? {
 		switch instruction.opCode {
 		case 1: // Add
-			memory[memory[programCounter + 3]] = arg1(for: instruction) + arg2(for: instruction)
+			memory[safe: memory[safe: programCounter + 3]] = arg1(for: instruction) + arg2(for: instruction)
 			programCounter += 4
 		case 2: // Multiply
-			memory[memory[programCounter + 3]] = arg1(for: instruction) * arg2(for: instruction)
+			memory[safe: memory[safe: programCounter + 3]] = arg1(for: instruction) * arg2(for: instruction)
 			programCounter += 4
 		case 3: // Assign
 			switch instruction.arg1Mode {
 			case .position:
-				memory[memory[programCounter + 1]] = input.removeFirst()
+				memory[safe: memory[safe: programCounter + 1]] = input.removeFirst()
 			case .immediate:
 				memory[programCounter + 1] = input.removeFirst()
-			case .relative
+			case .relative:
 				memory[relativeBase + memory[programCounter + 1]] = input.removeFirst()
 			}
 			programCounter += 2
@@ -84,7 +84,7 @@ public final class Computer {
 			defer { programCounter += 2 }
 			switch instruction.arg1Mode {
 			case .position:
-				return memory[memory[programCounter + 1]]
+				return memory[safe: memory[safe: programCounter + 1]]
 			case .immediate:
 				return memory[programCounter + 1]
 			case .relative:
@@ -104,16 +104,16 @@ public final class Computer {
 			}
 		case 7: // Less Than
 			if arg1(for: instruction) < arg2(for: instruction) {
-				memory[memory[programCounter + 3]] = 1
+				memory[safe: memory[safe: programCounter + 3]] = 1
 			} else {
-				memory[memory[programCounter + 3]] = 0
+				memory[safe: memory[safe: programCounter + 3]] = 0
 			}
 			programCounter += 4
 		case 8: // Equals
 			if arg1(for: instruction) == arg2(for: instruction) {
-				memory[memory[programCounter + 3]] = 1
+				memory[safe: memory[safe: programCounter + 3]] = 1
 			} else {
-				memory[memory[programCounter + 3]] = 0
+				memory[safe: memory[safe: programCounter + 3]] = 0
 			}
 			programCounter += 4
 		case 9: // Adjust relative base
@@ -127,5 +127,23 @@ public final class Computer {
 		}
 
 		return nil
+	}
+}
+
+private extension Array where Element == Int {
+	subscript(safe index: Int) -> Element {
+		get {
+			if index >= count {
+				return 0
+			} else {
+				return self[index]
+			}
+		}
+		set {
+			if index >= count {
+				self += Array(repeating: 0, count: index - count + 1)
+			}
+			self[index] = newValue
+		}
 	}
 }

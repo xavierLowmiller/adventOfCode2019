@@ -63,22 +63,22 @@ public final class Computer {
 	///
 	/// - Parameter memory: the memory to operate on
 	private func execute(instruction: Instruction, input: inout [Int]) -> Int? {
-		switch instruction.opCode {
-		case 1: // Add
+		switch instruction.operation {
+		case .add:
 			if instruction.arg3Mode == .position {
 				memory[safe: memory[safe: programCounter + 3]] = arg1(for: instruction) + arg2(for: instruction)
 			} else {
 				memory[safe: relativeBase + memory[safe: programCounter + 3]] = arg1(for: instruction) + arg2(for: instruction)
 			}
 			programCounter += 4
-		case 2: // Multiply
+		case .multiply:
 			if instruction.arg3Mode == .position {
 				memory[safe: memory[safe: programCounter + 3]] = arg1(for: instruction) * arg2(for: instruction)
 			} else {
 				memory[safe: relativeBase + memory[safe: programCounter + 3]] = arg1(for: instruction) * arg2(for: instruction)
 			}
 			programCounter += 4
-		case 3: // Assign
+		case .assign:
 			switch instruction.arg1Mode {
 			case .position:
 				memory[safe: memory[safe: programCounter + 1]] = input.removeFirst()
@@ -88,7 +88,7 @@ public final class Computer {
 				memory[relativeBase + memory[programCounter + 1]] = input.removeFirst()
 			}
 			programCounter += 2
-		case 4: // Read
+		case .read:
 			defer { programCounter += 2 }
 			switch instruction.arg1Mode {
 			case .position:
@@ -98,19 +98,19 @@ public final class Computer {
 			case .relative:
 				return memory[relativeBase + memory[programCounter + 1]]
 			}
-		case 5: // Jump if true
+		case .jumpIfTrue:
 			if arg1(for: instruction) != 0 {
 				programCounter = arg2(for: instruction)
 			} else {
 				programCounter += 3
 			}
-		case 6: // Jump if false
+		case .jumpIfFalse:
 			if arg1(for: instruction) == 0 {
 				programCounter = arg2(for: instruction)
 			} else {
 				programCounter += 3
 			}
-		case 7: // Less Than
+		case .lessThan:
 			if arg1(for: instruction) < arg2(for: instruction) {
 				if instruction.arg3Mode == .position {
 					memory[safe: memory[safe: programCounter + 3]] = 1
@@ -125,7 +125,7 @@ public final class Computer {
 				}
 			}
 			programCounter += 4
-		case 8: // Equals
+		case .equals:
 			if arg1(for: instruction) == arg2(for: instruction) {
 				if instruction.arg3Mode == .position {
 					memory[safe: memory[safe: programCounter + 3]] = 1
@@ -140,14 +140,12 @@ public final class Computer {
 				}
 			}
 			programCounter += 4
-		case 9: // Adjust relative base
+		case .adjustRelativeBase:
 			relativeBase += arg1(for: instruction)
 			programCounter += 2
 
-		case 99: // Halt
+		case .halt:
 			programCounter = -1
-		default:
-			fatalError("Invalid opcode \(instruction.opCode) at \(programCounter)")
 		}
 
 		return nil

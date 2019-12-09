@@ -18,8 +18,9 @@ public final class Computer {
 	public func execute(input: Int...) -> Int? {
 		var input = input
 		var output: Int?
-		while memory[programCounter] != 99, output == nil {
-			let instruction = Instruction(opCode: memory[programCounter])
+		while let instruction = Instruction(opCode: memory[programCounter]),
+			instruction.operation != .halt,
+			output == nil {
 			output = execute(instruction: instruction, input: &input)
 		}
 
@@ -31,9 +32,9 @@ public final class Computer {
 		case .position:
 			return memory[safe: memory[safe: programCounter + 1]]
 		case .immediate:
-			return memory[programCounter + 1]
+			return memory[safe: programCounter + 1]
 		case .relative:
-			return memory[relativeBase + memory[programCounter + 1]]
+			return memory[safe: relativeBase + memory[safe: programCounter + 1]]
 		}
 	}
 
@@ -42,9 +43,9 @@ public final class Computer {
 		case .position:
 			return memory[safe: memory[safe: programCounter + 2]]
 		case .immediate:
-			return memory[programCounter + 2]
+			return memory[safe: programCounter + 2]
 		case .relative:
-			return memory[relativeBase + memory[programCounter + 2]]
+			return memory[safe: relativeBase + memory[safe: programCounter + 2]]
 		}
 	}
 
@@ -53,9 +54,34 @@ public final class Computer {
 		case .position:
 			return memory[safe: memory[safe: programCounter + 3]]
 		case .immediate:
-			return memory[programCounter + 3]
+			return memory[safe: programCounter + 3]
 		case .relative:
-			return memory[relativeBase + memory[programCounter + 3]]
+			return memory[safe: relativeBase + memory[safe: programCounter + 3]]
+		}
+	}
+
+	private func writeAddress(for instruction: Instruction) -> Int {
+		switch instruction.operation {
+		case .add, .multiply, .lessThan, .equals:
+			switch instruction.arg3Mode {
+			case .position:
+				return memory[safe: programCounter + 3]
+			case .immediate:
+				return programCounter + 3
+			case .relative:
+				return relativeBase + memory[safe: programCounter + 3]
+			}
+		case .assign:
+			switch instruction.arg1Mode {
+			case .position:
+				return memory[safe: programCounter + 1]
+			case .immediate:
+				return programCounter + 1
+			case .relative:
+				return relativeBase + memory[safe: programCounter + 1]
+			}
+		default:
+			fatalError("Instruction \(instruction) shouldn't write")
 		}
 	}
 
@@ -63,89 +89,38 @@ public final class Computer {
 	///
 	/// - Parameter memory: the memory to operate on
 	private func execute(instruction: Instruction, input: inout [Int]) -> Int? {
+		defer {
+			programCounter += instruction.programCounterIncrement
+		}
 		switch instruction.operation {
 		case .add:
-			if instruction.arg3Mode == .position {
-				memory[safe: memory[safe: programCounter + 3]] = arg1(for: instruction) + arg2(for: instruction)
-			} else {
-				memory[safe: relativeBase + memory[safe: programCounter + 3]] = arg1(for: instruction) + arg2(for: instruction)
-			}
-			programCounter += 4
+			memory[safe: writeAddress(for: instruction)] = arg1(for: instruction) + arg2(for: instruction)
 		case .multiply:
-			if instruction.arg3Mode == .position {
-				memory[safe: memory[safe: programCounter + 3]] = arg1(for: instruction) * arg2(for: instruction)
-			} else {
-				memory[safe: relativeBase + memory[safe: programCounter + 3]] = arg1(for: instruction) * arg2(for: instruction)
-			}
-			programCounter += 4
+			memory[safe: writeAddress(for: instruction)] = arg1(for: instruction) * arg2(for: instruction)
 		case .assign:
-			switch instruction.arg1Mode {
-			case .position:
-				memory[safe: memory[safe: programCounter + 1]] = input.removeFirst()
-			case .immediate:
-				memory[programCounter + 1] = input.removeFirst()
-			case .relative:
-				memory[relativeBase + memory[programCounter + 1]] = input.removeFirst()
-			}
-			programCounter += 2
+			memory[safe: writeAddress(for: instruction)] = input.removeFirst()
 		case .read:
-			defer { programCounter += 2 }
-			switch instruction.arg1Mode {
-			case .position:
-				return memory[safe: memory[safe: programCounter + 1]]
-			case .immediate:
-				return memory[programCounter + 1]
-			case .relative:
-				return memory[relativeBase + memory[programCounter + 1]]
-			}
+			return arg1(for: instruction)
 		case .jumpIfTrue:
 			if arg1(for: instruction) != 0 {
-				programCounter = arg2(for: instruction)
-			} else {
-				programCounter += 3
+				// Need to subtract 3 to counter the automatic increase
+				programCounter = arg2(for: instruction) - 3
 			}
 		case .jumpIfFalse:
 			if arg1(for: instruction) == 0 {
-				programCounter = arg2(for: instruction)
-			} else {
-				programCounter += 3
+				// Need to subtract 3 to counter the automatic increase
+				programCounter = arg2(for: instruction) - 3
 			}
 		case .lessThan:
-			if arg1(for: instruction) < arg2(for: instruction) {
-				if instruction.arg3Mode == .position {
-					memory[safe: memory[safe: programCounter + 3]] = 1
-				} else {
-					memory[safe: relativeBase + memory[safe: programCounter + 3]] = 1
-				}
-			} else {
-				if instruction.arg3Mode == .position {
-					memory[safe: memory[safe: programCounter + 3]] = 0
-				} else {
-					memory[safe: relativeBase + memory[safe: programCounter + 3]] = 0
-				}
-			}
-			programCounter += 4
+			let valueToWrite = arg1(for: instruction) < arg2(for: instruction) ? 1 : 0
+			memory[safe: writeAddress(for: instruction)] = valueToWrite
 		case .equals:
-			if arg1(for: instruction) == arg2(for: instruction) {
-				if instruction.arg3Mode == .position {
-					memory[safe: memory[safe: programCounter + 3]] = 1
-				} else {
-					memory[safe: relativeBase + memory[safe: programCounter + 3]] = 1
-				}
-			} else {
-				if instruction.arg3Mode == .position {
-					memory[safe: memory[safe: programCounter + 3]] = 0
-				} else {
-					memory[safe: relativeBase + memory[safe: programCounter + 3]] = 0
-				}
-			}
-			programCounter += 4
+			let valueToWrite = arg1(for: instruction) == arg2(for: instruction) ? 1 : 0
+			memory[safe: writeAddress(for: instruction)] = valueToWrite
 		case .adjustRelativeBase:
 			relativeBase += arg1(for: instruction)
-			programCounter += 2
-
 		case .halt:
-			programCounter = -1
+			break
 		}
 
 		return nil

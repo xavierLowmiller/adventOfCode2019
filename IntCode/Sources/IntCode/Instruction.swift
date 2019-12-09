@@ -23,10 +23,25 @@ struct Instruction {
 	let arg3Mode: AddressMode
 	let operation: Operation
 
-	init(opCode: Int) {
-		operation = Operation(rawValue: opCode % 100)!
+	init?(opCode: Int) {
+		guard let operation = Operation(rawValue: opCode % 100)
+			else { return nil }
 		arg1Mode = AddressMode(rawValue: opCode / 100 % 10) ?? .position
 		arg2Mode = AddressMode(rawValue: opCode / 1000 % 10) ?? .position
 		arg3Mode = AddressMode(rawValue: opCode / 10000 % 10) ?? .position
+		self.operation = operation
+	}
+
+	var programCounterIncrement: Int {
+		switch operation {
+		case .halt:
+			return 1
+		case .assign, .read, .adjustRelativeBase:
+			return 2
+		case .jumpIfTrue, .jumpIfFalse:
+			return 3
+		case .add, .multiply, .lessThan, .equals:
+			return 4
+		}
 	}
 }

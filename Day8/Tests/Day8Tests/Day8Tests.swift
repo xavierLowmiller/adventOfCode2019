@@ -41,6 +41,7 @@ final class Day8Tests: XCTestCase {
 private extension Array where Element == String {
 	var pretty: String {
 		reduce("") { $0 + $1 + "\n" }
-			.replacingOccurrences(of: "0", with: " ")
+			.replacingOccurrences(of: "0", with: "⬛️")
+			.replacingOccurrences(of: "1", with: "⬜️")
 	}
 }

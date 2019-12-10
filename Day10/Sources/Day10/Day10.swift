@@ -103,13 +103,12 @@ struct AsteroidMap {
 		let asteroidsToVaporize = asteroids.filter { $0 != asteroid }
 
 		// A mapping from direction to points
-		var byAngle: [Vector: [Point]] = asteroidsToVaporize.reduce(into: [:]) { result, point in
-			let vector = asteroid.vector(to: point)
-
-			result[vector.direction, default: []].append(point)
-			result[vector.direction]?.sort {
-				asteroid.vector(to: $0).length < asteroid.vector(to: $1).length
-			}
+		var byAngle: [Vector: [Point]] = Dictionary(grouping: asteroidsToVaporize) {
+			let vector = asteroid.vector(to: $0)
+			return vector.direction
+		}
+		.mapValues { value in
+			value.sorted { asteroid.vector(to: $0).length < asteroid.vector(to: $1).length }
 		}
 
 		let initialVector = Vector(dx: 0, dy: -1)

@@ -1,3 +1,5 @@
+import Foundation
+
 struct Point: Hashable, CustomStringConvertible {
 	let x: Int
 	let y: Int
@@ -19,25 +21,52 @@ struct Point: Hashable, CustomStringConvertible {
 	}
 }
 
-struct Vector {
+struct Vector: Hashable {
 	let dx: Int
 	let dy: Int
 
-	/// This isn't the real length, but compares accurately
-	var length: Int {
-		dx * dx + dy * dy
+	var length: Double {
+		sqrt(Double(dx * dx + dy * dy))
+	}
+
+	var direction: Vector {
+
+		if dx == 0, dy == 0 {
+			return Vector(dx: 0, dy: 0)
+		}
+
+		if dx == 0 {
+			return Vector(dx: 0, dy: dy > 0 ? 1 : -1)
+		}
+		if dy == 0 {
+			return Vector(dx: dx > 0 ? 1 : -1, dy: dy)
+		}
+
+		var copy = self
+		for candidate in [2, 3, 5, 7, 11, 13] {
+			while copy.dx.isMultiple(of: candidate) && copy.dy.isMultiple(of: candidate) {
+				copy = Vector(dx: copy.dx / candidate, dy: copy.dy / candidate)
+			}
+		}
+
+		return copy
 	}
 
 	func isCodirectional(to vector: Vector) -> Bool {
-		let dotProduct = dx * vector.dx + dy * vector.dy
-		return dotProduct * dotProduct == length * vector.length
+		self.direction == vector.direction
 	}
 
-	func isBlocked(by vector: Vector) -> Bool {
-		vector.isCodirectional(to: self)
-			&& vector.length < self.length
-			&& dx * vector.dx >= 0
-			&& dy * vector.dy >= 0
+	func angle(to vector: Vector) -> Double {
+		let dotProduct = dx * vector.dx + dy * vector.dy
+		let lengths = length * vector.length
+
+		let angle = acos(Double(dotProduct) / lengths)
+
+		if vector.dx < 0 {
+			return 2 * .pi - angle
+		} else {
+			return angle
+		}
 	}
 }
 
@@ -58,10 +87,9 @@ struct AsteroidMap {
 		var bestAsteroid = (point: Point.zero, amount: 0)
 
 		for asteroid in asteroids {
-			var vectors = asteroid.vectors(to: asteroids)
-			vectors = vectors.filter {
-				!vectors.contains(where: $0.isBlocked)
-			}
+			let vectors = Set(asteroid
+				.vectors(to: asteroids)
+				.map { $0.direction })
 
 			if bestAsteroid.amount < vectors.count {
 				bestAsteroid = (asteroid, vectors.count)
@@ -69,5 +97,40 @@ struct AsteroidMap {
 		}
 
 		return bestAsteroid
+	}
+
+	func vaporize(from asteroid: Point) -> [Point] {
+		let asteroidsToVaporize = asteroids.filter { $0 != asteroid }
+
+		// A mapping from direction to points
+		var byAngle: [Vector: [Point]] = asteroidsToVaporize.reduce(into: [:]) { result, point in
+			let vector = asteroid.vector(to: point)
+
+			result[vector.direction, default: []].append(point)
+			result[vector.direction]?.sort {
+				asteroid.vector(to: $0).length < asteroid.vector(to: $1).length
+			}
+		}
+
+		let initialVector = Vector(dx: 0, dy: -1)
+
+		var pointsInOrder: [Point] = []
+
+		while !byAngle.isEmpty {
+			let sortedKeys = byAngle.keys.sorted {
+				initialVector.angle(to: $0) < initialVector.angle(to: $1)
+			}
+			for angle in sortedKeys {
+				let point = byAngle[angle]!.removeFirst()
+				pointsInOrder.append(point)
+				if byAngle[angle]!.isEmpty {
+					byAngle[angle] = nil
+				}
+			}
+		}
+
+		assert(pointsInOrder.count == asteroidsToVaporize.count)
+
+		return pointsInOrder
 	}
 }

@@ -39,25 +39,27 @@ enum Direction {
 
 final class Robot {
 	let brain: Computer
+	let baseColor: Int
 
-	var positionsVisited: [Position: Int] = [:]
+	var positions: [Position: Int] = [:]
 	var currentPosition = Position.zero
 	var currentDirection: Direction = .up
 
-	init(memory: [Int]) {
+	init(memory: [Int], baseColor: Int) {
 		brain = Computer(memory: memory)
+		self.baseColor = baseColor
 	}
 
 	func paint() {
 
-		var code: Int? = 0
+		var code: Int? = baseColor
 
 		while let input = code,
 			let newColor = brain.execute(input: input),
 			let turnDirection = brain.execute(input: input) {
 
 				// Paint
-				positionsVisited[currentPosition] = newColor
+				positions[currentPosition] = newColor
 				// Turn
 				currentDirection = currentDirection.newDirection(for: turnDirection)
 
@@ -73,7 +75,29 @@ final class Robot {
 					currentPosition = Position(x: currentPosition.x + 1, y: currentPosition.y)
 				}
 
-				code = positionsVisited[currentPosition] ?? 0
+				code = positions[currentPosition] ?? baseColor
 		}
+	}
+
+	var painting: String {
+		var array: [[Character]] = []
+
+		let minX = positions.keys.map { $0.x }.min() ?? 0
+		let maxX = positions.keys.map { $0.x }.max() ?? 0
+		let minY = positions.keys.map { $0.y }.min() ?? 0
+		let maxY = positions.keys.map { $0.y }.max() ?? 0
+
+		for y in minY...maxY {
+			array.append([])
+			for x in minX...maxX {
+				let position = Position(x: x, y: y)
+				let color = positions[position] ?? baseColor
+				array[y - minY].append(color == 1 ? "⬜️" : "⬛️")
+			}
+		}
+
+		return array
+			.map { String($0) }
+			.joined(separator: "\n")
 	}
 }

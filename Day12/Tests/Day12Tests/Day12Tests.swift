@@ -127,6 +127,38 @@ final class Day12Tests: XCTestCase {
 		XCTAssertEqual(system.energy, 179)
 	}
 
+	func testPeriods1() {
+		// Given
+		let system = System(moons: [
+			.init(positionT: (-1, 0, 2)),
+			.init(positionT: (2, -10, -7)),
+			.init(positionT: (4, -8, 8)),
+			.init(positionT: (3, 5, -1))
+		])
+
+		// When
+		let period = system.period
+
+		// Then
+		XCTAssertEqual(period, 2772)
+	}
+
+	func testPeriods2() {
+		// Given
+		let system = System(moons: [
+			.init(positionT: (-8, -10, 0)),
+			.init(positionT: (5, 5, 10)),
+			.init(positionT: (2, -7, 3)),
+			.init(positionT: (9, -8, -3))
+		])
+
+		// When
+		let period = system.period
+
+		// Then
+		XCTAssertEqual(period, 4686774924)
+	}
+
 	func testDay12Part1() {
 		let system = input
 
@@ -138,6 +170,8 @@ final class Day12Tests: XCTestCase {
 	}
 
 	func testDay12Part2() {
-		print("Solution to day 12 part 2:")
+		let system = input
+
+		print("Solution to day 12 part 2:", system.period)
 	}
 }

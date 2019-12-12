@@ -94,6 +94,48 @@ final class System {
 			return moon
 		}
 	}
+
+	var period: Int {
+		let initialMoonsX = moons.map({ ($0.position.x, $0.velocity.x) })
+		let initialMoonsY = moons.map({ ($0.position.y, $0.velocity.y) })
+		let initialMoonsZ = moons.map({ ($0.position.z, $0.velocity.z) })
+
+		var xPeriod: Int?
+		var yPeriod: Int?
+		var zPeriod: Int?
+		var stepCount: Int = 0
+
+		while xPeriod == nil || yPeriod == nil || zPeriod == nil {
+			step()
+			stepCount += 1
+
+			let moonsX = moons.map({ ($0.position.x, $0.velocity.x) })
+			let moonsY = moons.map({ ($0.position.y, $0.velocity.y) })
+			let moonsZ = moons.map({ ($0.position.z, $0.velocity.z) })
+
+			if xPeriod == nil,
+				moonsX.map({ $0.0 }) == initialMoonsX.map({ $0.0 }),
+				moonsX.map({ $0.1 }) == initialMoonsX.map({ $0.1 }) {
+				xPeriod = stepCount
+			}
+
+			if yPeriod == nil,
+				moonsY.map({ $0.0 }) == initialMoonsY.map({ $0.0 }),
+				moonsY.map({ $0.1 }) == initialMoonsY.map({ $0.1 }) {
+				yPeriod = stepCount
+			}
+
+			if zPeriod == nil,
+				moonsZ.map({ $0.0 }) == initialMoonsZ.map({ $0.0 }),
+				moonsZ.map({ $0.1 }) == initialMoonsZ.map({ $0.1 }) {
+				zPeriod = stepCount
+			}
+		}
+
+		return [xPeriod, yPeriod, zPeriod]
+			.compactMap { $0 }
+			.lcm!
+	}
 }
 
 extension Vector {

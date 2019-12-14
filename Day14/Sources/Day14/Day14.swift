@@ -21,6 +21,26 @@ final class System {
 		}
 	}
 
+	func amountOfFuel(for oreAmount: UInt = 1000000000000) -> UInt {
+		// Binary Search
+		var lowerBound: UInt = 0
+		var upperBound: UInt = 1000000000000
+		var current = (upperBound + lowerBound) / 2
+
+		while lowerBound <= upperBound {
+
+			let oreRequired = calculateOreNeeded(for: current)
+			if oreRequired < oreAmount {
+				lowerBound = current + 1
+			} else {
+				upperBound = current - 1
+			}
+			current = (upperBound + lowerBound) / 2
+		}
+
+		return current
+	}
+
 	func calculateOreNeeded(for fuel: UInt = 1) -> UInt {
 		var cookbook = self.cookbook
 		var ingredientsForFuel = cookbook.removeValue(forKey: "FUEL")!.ingredients.mapValues { $0 * fuel }

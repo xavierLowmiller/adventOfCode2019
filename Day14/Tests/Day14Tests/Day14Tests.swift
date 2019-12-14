@@ -99,7 +99,7 @@ final class Day14Tests: XCTestCase {
 		XCTAssertEqual(oreNeeded, 7)
 	}
 
-	func testPart1Example1() {
+	func testExample1() {
 		// Given
 		let input = """
 			10 ORE => 10 A
@@ -118,7 +118,7 @@ final class Day14Tests: XCTestCase {
 		XCTAssertEqual(oreNeeded, 31)
 	}
 
-	func testPart1Example2() {
+	func testExample2() {
 		// Given
 		let input = """
 			9 ORE => 2 A
@@ -138,7 +138,7 @@ final class Day14Tests: XCTestCase {
 		XCTAssertEqual(oreNeeded, 165)
 	}
 
-	func testPart1Example3() {
+	func testExample3() {
 		// Given
 		let input = """
 			157 ORE => 5 NZVS
@@ -155,12 +155,14 @@ final class Day14Tests: XCTestCase {
 
 		// When
 		let oreNeeded = system.calculateOreNeeded()
+		let fuelProduced = system.amountOfFuel()
 
 		// Then
 		XCTAssertEqual(oreNeeded, 13312)
+		XCTAssertEqual(fuelProduced, 82892753)
 	}
 
-	func testPart1Example4() {
+	func testExample4() {
 		// Given
 		let input = """
 			2 VPVL, 7 FWMGM, 2 CXFTF, 11 MNCFX => 1 STKFG
@@ -180,12 +182,14 @@ final class Day14Tests: XCTestCase {
 
 		// When
 		let oreNeeded = system.calculateOreNeeded()
+		let fuelProduced = system.amountOfFuel()
 
 		// Then
 		XCTAssertEqual(oreNeeded, 180697)
+		XCTAssertEqual(fuelProduced, 5586022)
 	}
 
-	func testPart1Example5() {
+	func testExample5() {
 		// Given
 		let input = """
 			171 ORE => 8 CNZTR
@@ -210,9 +214,11 @@ final class Day14Tests: XCTestCase {
 
 		// When
 		let oreNeeded = system.calculateOreNeeded()
+		let fuelProduced = system.amountOfFuel()
 
 		// Then
 		XCTAssertEqual(oreNeeded, 2210736)
+		XCTAssertEqual(fuelProduced, 460664)
 	}
 
 	func testDay14Part1() {
@@ -221,6 +227,7 @@ final class Day14Tests: XCTestCase {
 	}
 
 	func testDay14Part2() {
-		print("Solution to day 14 part 2:")
+		let system = System(string: input)
+		print("Solution to day 14 part 2:", system.amountOfFuel())
 	}
 }

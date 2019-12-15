@@ -7,4 +7,9 @@ final class Day15Tests: XCTestCase {
 		let robot = Robot(memory: input)
 		print("Solution to day 15 part 1:", robot.findShortestPathToOxygen())
 	}
+
+	func testDay15SolutionPart2() {
+		let robot = Robot(memory: input)
+		print("Solution to day 15 part 2:", robot.findLongestPathToOxygen())
+	}
 }

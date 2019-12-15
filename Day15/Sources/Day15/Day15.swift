@@ -110,6 +110,15 @@ final class Robot {
 		return aStar().count - 1
 	}
 
+	func findLongestPathToOxygen() -> Int {
+		map
+			.filter { $0.value == .free }
+			.keys
+			.map(aStar)
+			.map { $0.count - 1 }
+			.max() ?? 0
+	}
+
 	private func aStar(start: Point = .zero) -> [Point] {
 		let goal = map.first { $0.value == .oxygen }!.key
 

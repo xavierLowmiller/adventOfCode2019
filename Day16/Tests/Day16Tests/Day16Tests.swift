@@ -2,6 +2,29 @@ import XCTest
 @testable import Day16
 
 final class Day16Tests: XCTestCase {
+
+	func testFactorLine1() {
+		// Given
+		let expected = [1, 0, -1, 0, 1, 0, -1, 0]
+
+		// When
+		let factors = (0..<8).map { factor(for: $0, line: 0) }
+
+		// Then
+		XCTAssertEqual(factors, expected)
+	}
+
+	func testFactorLine2() {
+		// Given
+		let expected = [0, 1, 1, 0, 0, -1, -1, 0]
+
+		// When
+		let factors = (0..<8).map { factor(for: $0, line: 1) }
+
+		// Then
+		XCTAssertEqual(factors, expected)
+	}
+
 	func testSinglePhaseStepExample1() {
 		// Given
 		let input = "12345678".intArray

@@ -1,16 +1,32 @@
-func fft(of numbers: [Int], phases: UInt) -> [Int] {
+func fft1(of numbers: [Int], phases: UInt) -> [Int] {
 	guard phases > 0 else { return numbers }
 
 	let result: [Int] = (0..<numbers.count).map { line in
 
-		return numbers.enumerated().reduce(0) { (result, arg1) in
+		numbers.enumerated().reduce(0) { (result, arg1) in
 
 			let (index, number) = arg1
 			return result + number * factor(for: index, line: line)
 		}
 	}.map { abs($0 % 10) }
 
-	return fft(of: result, phases: phases - 1)
+	return fft1(of: result, phases: phases - 1)
+}
+
+func fft2(of numbers: [Int], phases: Int) -> String {
+
+	let skip = numbers.prefix(7).reduce(0, { $0 * 10 + $1 })
+	var numbersAfterSkip = Array([[Int]](repeating: numbers, count: 10000).flatMap { $0 }[skip...])
+
+	for _ in 0..<phases {
+		for offset in 0..<numbersAfterSkip.count - 1 {
+			let index = numbersAfterSkip.count - offset - 2
+			numbersAfterSkip[index] += numbersAfterSkip[index + 1]
+			numbersAfterSkip[index] %= 10
+		}
+	}
+
+	return numbersAfterSkip.prefix(8).map { String($0) }.joined()
 }
 
 @inline(__always)

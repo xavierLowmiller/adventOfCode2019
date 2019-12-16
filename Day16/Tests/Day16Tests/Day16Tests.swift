@@ -31,7 +31,7 @@ final class Day16Tests: XCTestCase {
 		let expected = "48226158".intArray
 
 		// When
-		let output = fft(of: input, phases: 1)
+		let output = fft1(of: input, phases: 1)
 
 		// Then
 		XCTAssertEqual(output, expected)
@@ -43,7 +43,7 @@ final class Day16Tests: XCTestCase {
 		let expected = "34040438".intArray
 
 		// When
-		let output = fft(of: input, phases: 2)
+		let output = fft1(of: input, phases: 2)
 
 		// Then
 		XCTAssertEqual(output, expected)
@@ -55,7 +55,7 @@ final class Day16Tests: XCTestCase {
 		let expected = "03415518".intArray
 
 		// When
-		let output = fft(of: input, phases: 3)
+		let output = fft1(of: input, phases: 3)
 
 		// Then
 		XCTAssertEqual(output, expected)
@@ -67,7 +67,7 @@ final class Day16Tests: XCTestCase {
 		let expected = "01029498".intArray
 
 		// When
-		let output = fft(of: input, phases: 4)
+		let output = fft1(of: input, phases: 4)
 
 		// Then
 		XCTAssertEqual(output, expected)
@@ -79,7 +79,7 @@ final class Day16Tests: XCTestCase {
 		let expected = "24176176".intArray
 
 		// When
-		let output = fft(of: input, phases: 100)
+		let output = fft1(of: input, phases: 100)
 
 		// Then
 		XCTAssertEqual(output.prefix(8), expected.prefix(8))
@@ -91,7 +91,7 @@ final class Day16Tests: XCTestCase {
 		let expected = "73745418".intArray
 
 		// When
-		let output = fft(of: input, phases: 100)
+		let output = fft1(of: input, phases: 100)
 
 		// Then
 		XCTAssertEqual(output.prefix(8), expected.prefix(8))
@@ -103,15 +103,20 @@ final class Day16Tests: XCTestCase {
 		let expected = "52432133".intArray
 
 		// When
-		let output = fft(of: input, phases: 100)
+		let output = fft1(of: input, phases: 100)
 
 		// Then
 		XCTAssertEqual(output.prefix(8), expected.prefix(8))
 	}
 
 	func testDay16SolutionPart1() {
-		let number = fft(of: input.intArray, phases: 100)
+		let number = fft1(of: input.intArray, phases: 100)
 		print("Solution to day 16 part 1:", number.map { String($0) }.prefix(8).joined())
+	}
+
+	func testDay16SolutionPart2() {
+		let number = fft2(of: input.intArray, phases: 100)
+		print("Solution to day 16 part 1:", number)
 	}
 }
 

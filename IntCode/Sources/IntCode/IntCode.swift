@@ -17,6 +17,14 @@ public final class Computer {
 	@discardableResult
 	public func execute(input: Int...) -> Int? {
 		var input = input
+		return execute(input: &input)
+	}
+
+	/// Executes the program from the current program counter onwards
+	/// until an output is produced or the halt instruction is found
+	/// - Parameter input: Any input arguments
+	@discardableResult
+	public func execute(input: inout [Int]) -> Int? {
 		var output: Int?
 		while let instruction = Instruction(opCode: memory[programCounter]),
 			instruction.operation != .halt,

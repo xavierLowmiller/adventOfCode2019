@@ -55,4 +55,37 @@ final class Robot {
 
 		return result
 	}
+
+	func traverseScaffolding() -> Int {
+		let mainRoutine = "B,C,B,A,C,A,C,A,B,A\n"
+		let subRoutineA = "R,12,L,10,L,6,R,10\n"
+		let subRoutineB = "R,12,L,6,R,12\n"
+		let subRoutineC = "L,8,L,6,L,10\n"
+
+		var program = [
+			mainRoutine,
+			subRoutineA,
+			subRoutineB,
+			subRoutineC,
+			"n\n"
+		]
+			.joined()
+			.compactMap { $0.asciiValue }
+			.map(Int.init)
+
+		var outputP1: [Int] = []
+		var outputP2: [Int] = []
+
+		// 'Install' program
+		while !program.isEmpty, let o = computer.execute(input: &program) {
+			outputP1.append(o)
+		}
+
+		// 'Run' program
+		while let o = computer.execute() {
+			outputP2.append(o)
+		}
+
+		return outputP2.last!
+	}
 }

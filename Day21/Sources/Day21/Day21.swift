@@ -7,21 +7,30 @@ final class SpringDroid {
 		computer = Computer(memory: memory)
 	}
 
-	func findHullDamage() -> Int {
+	func findHullDamageWalking() -> Int {
 		let program = """
-		NOT A J
-		NOT B T
-		AND T J
-		NOT C T
-		AND T J
-		NOT C T
-		OR T J
+		NOT C J
 		NOT B T
 		OR T J
 		NOT A T
 		OR T J
 		AND D J
 		WALK
+		"""
+
+		return runSpringScript(program + "\n") ?? 0
+	}
+
+	func findHullDamageRunning() -> Int {
+		let program = """
+		NOT C J
+		AND H J
+		NOT B T
+		OR T J
+		NOT A T
+		OR T J
+		AND D J
+		RUN
 		"""
 
 		return runSpringScript(program + "\n") ?? 0

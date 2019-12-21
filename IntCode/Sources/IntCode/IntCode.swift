@@ -11,6 +11,29 @@ public final class Computer {
 		self.memory = memory
 	}
 
+	/// Executes a program in ASCII encoding
+	/// - Parameter program: The program to run
+	@discardableResult
+	public func runAsciiProgram(_ program: String) -> String {
+		var input = program.compactMap { $0.asciiValue }.map(Int.init)
+		var output: [Int] = []
+		while !input.isEmpty, let o = execute(input: &input) {
+			output.append(o)
+		}
+
+		return String(output
+			.compactMap { UnicodeScalar($0) }
+			.compactMap(Character.init))
+	}
+
+	public func runUntilHalted() -> [Int] {
+		var output: [Int] = []
+		while let o = execute() {
+			output.append(o)
+		}
+		return output
+	}
+
 	/// Executes the program from the current program counter onwards
 	/// until an output is produced or the halt instruction is found
 	/// - Parameter input: Any input arguments

@@ -9,6 +9,7 @@ final class Day23Tests: XCTestCase {
 	}
 
 	func testDay23SolutionPart2() {
-		print("Solution to day 23 part 2:")
+		let network = Network(memory: input)
+		print("Solution to day 23 part 2:", network.runWithNat().Y)
 	}
 }

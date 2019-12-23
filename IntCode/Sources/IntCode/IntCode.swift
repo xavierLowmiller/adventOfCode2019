@@ -48,14 +48,19 @@ public final class Computer {
 	/// - Parameter input: Any input arguments
 	@discardableResult
 	public func execute(input: inout [Int]) -> Int? {
-		var output: Int?
 		while let instruction = Instruction(opCode: memory[programCounter]),
-			instruction.operation != .halt,
-			output == nil {
-			output = execute(instruction: instruction, input: &input)
+			instruction.operation != .halt {
+				switch execute(instruction: instruction, input: &input) {
+				case .output(let output):
+					return output
+				case .noOutput:
+					break
+				case .waitForInput:
+					return nil
+				}
 		}
 
-		return output
+		return nil
 	}
 
 	private func arg1(for instruction: Instruction) -> Int {
@@ -122,7 +127,7 @@ public final class Computer {
 	/// - Parameters:
 	///   - instruction: The instruction to execute
 	///   - input: Any input parameters
-	private func execute(instruction: Instruction, input: inout [Int]) -> Int? {
+	private func execute(instruction: Instruction, input: inout [Int]) -> ExecutionStatus {
 		defer {
 			programCounter += instruction.programCounterIncrement
 		}
@@ -132,9 +137,13 @@ public final class Computer {
 		case .multiply:
 			memory[safe: writeAddress(for: instruction)] = arg1(for: instruction) * arg2(for: instruction)
 		case .assign:
-			memory[safe: writeAddress(for: instruction)] = input.removeFirst()
+			if input.isEmpty {
+				return .waitForInput
+			} else {
+				memory[safe: writeAddress(for: instruction)] = input.removeFirst()
+			}
 		case .read:
-			return arg1(for: instruction)
+			return .output(arg1(for: instruction))
 		case .jumpIfTrue:
 			if arg1(for: instruction) != 0 {
 				// Need to subtract 3 to counter the automatic increase
@@ -157,8 +166,14 @@ public final class Computer {
 			break
 		}
 
-		return nil
+		return .noOutput
 	}
+}
+
+private enum ExecutionStatus {
+	case output(Int)
+	case noOutput
+	case waitForInput
 }
 
 private extension Array where Element == Int {
